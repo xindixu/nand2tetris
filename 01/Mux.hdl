@@ -16,7 +16,13 @@ CHIP Mux {
     PARTS:
     // Put your code here:
     Not(in=sel, out=notSel);
+    // a and 1 always output the value of a
+    // so negate sel into notSel
     And(a=a, b=notSel, out=aOut);
+    // b and 1 always output the value of b
+    // so input sel directly
     And(a=b, b=sel, out=bOut);
+    // 0 or X will always output the value of X
+    // so make a/b as 0 if it is not the selected 
     Or(a=aOut, b=bOut, out=out);
 }
