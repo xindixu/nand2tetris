@@ -15,4 +15,9 @@ CHIP DMux {
 
     PARTS:
     // Put your code here:
+    // So invert this for a
+    Not(in=sel, out=notSel);
+    // 1 and X always output X
+    And(a=notSel, b=in, out=a);
+    And(a=sel, b=in, out=b);
 }
