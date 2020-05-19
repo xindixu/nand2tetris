@@ -53,22 +53,10 @@ CHIP ALU {
     And16(a=x2, b=y2, out=andXY);
     Mux16(a=andXY, b=sumXY, sel=f, out=out1);
     Not16(in=out1, out=notOut);
-    Mux16 (a=out1, b=notOut, sel=no, out=out, out[15]=ng, out[0]=toz1, out[1]=toz2, out[2]=toz3, out[3]=toz4, out[4]=toz5, out[5]=toz6, out[6]=toz7, out[7]=toz8, out[8]=toz9, out[9]=toz10, out[10]=toz11, out[11]=toz12, out[12]=toz13, out[13]=toz14, out[14]=toz15, out[15]=toz16);
+    Mux16 (a=out1, b=notOut, sel=no, out=out, out[15]=ng, out[0..7]=outLower, out[8..15]=outUpper);
 
-    Or (a=toz1, b=toz2, out=iszero1);
-    Or (a=toz3, b=toz4, out=iszero2);
-    Or (a=toz5, b=toz6, out=iszero3);
-    Or (a=toz7, b=toz8, out=iszero4);
-    Or (a=toz9, b=toz10, out=iszero5);
-    Or (a=toz11, b=toz12, out=iszero6);
-    Or (a=toz13, b=toz14, out=iszero7);
-    Or (a=toz15, b=toz16, out=iszero8);
-    Or (a=iszero1, b=iszero2, out=r2iszero1);
-    Or (a=iszero3, b=iszero4, out=r2iszero2);
-    Or (a=iszero5, b=iszero6, out=r2iszero3);
-    Or (a=iszero7, b=iszero8, out=r2iszero4);
-    Or (a=r2iszero1, b=r2iszero2, out=r3iszero1);
-    Or (a=r2iszero3, b=r2iszero4, out=r3iszero2);
-    Or (a=r3iszero1, b=r3iszero2, out=notzr);
-    Not (in=notzr, out=zr);
+    Or8Way(in=outLower, out=lower);
+    Or8Way(in=outUpper, out=upper);
+    Or(a=upper, b=lower, out=notZero);
+    Not(in=notZero, out=zr);
 }
