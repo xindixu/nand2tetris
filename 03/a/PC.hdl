@@ -17,4 +17,19 @@ CHIP PC {
 
     PARTS:
     // Put your code here:
+    // 3 way or to determine if we need to change value of the register
+    Or(a=inc, b=load, out=incOrLoad);
+    Or(a=incOrLoad, b=reset, out=change);
+
+    // preference: reset > load > inc
+    // order of mux: inc -> load -> reset
+
+    // eg. even value is altered in `load`, `reset` step will still make it back to 0 if `reset` == 1
+    // eg. even value is altered in `inc`, `load` step will still make it load in `in` if `load` == 1
+    Inc16(in=outLoop, out=incremented);
+    Mux16(a=in, b=incremented, sel=inc, out=afterInc);
+    Mux16(a=afterInc, b=in, sel=load, out=afterLoad);
+    Mux16(a=afterLoad, b=false, sel=reset, out=afterReset);
+
+    Register(in=afterReset, load=change, out=out, out=outLoop);
 }
