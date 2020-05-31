@@ -105,7 +105,7 @@ M = D
 (BLACKLOOP)
 // if i > 8191 (end of screen), go to ENDBLACK
 // i - 8191 > 0
-// 256 * 512 / 16 - 1= 8191
+// 256 * 512 / 16 - 1 = 8191
 @i
 D = M
 @8191
