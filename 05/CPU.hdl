@@ -94,5 +94,19 @@ CHIP CPU {
     DRegister(in=ALUOut, load=instruction[4], out=DRegisterState);
     ALU(x=DRegisterState, y=AorMRegisterState, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUOutput, zr=zero, ng=negative, out=outM);
 
+    // Handle jump
+    Not(in=negative, out=positive);
+    And(a=instruction[0], b=positive, out=JGT);
+    And(a=instruction[1], b=zero, out=JEQ);
+    Or(a=JGT, b=JEQ, out=JGE);
+    And(a=instruction[2], b=negative, out=JLT);
+    Or(a=JLT, b=JGT, out=JNE);
+    Or(a=JLT, b=JEQ, out=JLE);
+    And(a=instruction[0], b=instruction[1], out=j0Andj1);
+    And(a=instruction[2], b=j0Andj1, out=JMP);
+    Not(in=JMP, out=noJMP);
 
+    Or8Way(in[0]=false, in[1]=JGT, in[2]=JEQ, in[3]=JGE, in[4]=JLT, in[5]=JNE, in[6]=JLE, in[7]=JMP, out=jump);
+
+    PC(in=ARegisterState, load=jump, inc=true, reset=reset, out=pc);
 }
