@@ -35,98 +35,59 @@
 
   @BLACK
   0;JMP
-  (ENDBLACK)
+  (ENDCHANGELOOP)
 
-  (ENDWHITE)
   // goto LOOP
   @LOOP
   0;JMP
 
+///////////////
 
-
-
-//////////////////////
 (WHITE)
-@R2
-M = 1
-// Whiten the screen 
-// Reinitialize variables
-// i = 0, add = screen
-@i
+@fill
 M = 0
-@SCREEN
-D = A
-@add
-M = D
-
-(WHITELOOP)
-// if i > 8191 (end of screen), go to ENDWHITE
-// i - 8191 > 0
-@i
-D = M
-@8191
-D = D - A
-@ENDWHITELOOP
-D;JGT
-
-// else whiten screen
-@add
-A = M
-M = 0
-
-// increment
-D = 1
-@add
-M = M + D
-@i
-M = M + 1
-
-@WHITELOOP
-0;JMP
-(ENDWHITELOOP)
-@ENDWHITE
+@CHANGE
 0;JMP
 
-
-//////////////////////
 (BLACK)
-@R2
-M = 0
-// Blackend Screen
-// Reinitialize variables
-// i = 0, add = screen
-@i
-M = 0
-@SCREEN
-D = A
-@add
-M = D
-
-(BLACKLOOP)
-// if i > 8191 (end of screen), go to ENDBLACK
-// i - 8191 > 0
-// 256 * 512 / 16 - 1 = 8191
-@i
-D = M
-@8191
-D = D - A
-@ENDBLACKLOOP
-D;JGT
-
-// else blackend screen
-@add
-A = M
+@fill
 M = -1
 
-// increment
-D = 1
-@add
-M = M + D
-@i
-M = M + 1
+@CHANGE
+0;JMP
 
-@BLACKLOOP
-0;JMP
-(ENDBLACKLOOP)
-@ENDBLACK
-0;JMP
+///////////////
+(CHANGE)
+@i
+M = 0
+@SCREEN
+D = A
+@add
+M = D
+
+  (CHANGELOOP)
+  // if i > 8191 (end of screen), go to ENDBLACK
+  // i - 8191 > 0
+  // 256 * 512 / 16 - 1 = 8191
+  @i
+  D = M
+  @8191
+  D = D - A
+  @ENDCHANGELOOP
+  D;JGT
+
+  // else fill screen
+  @fill
+  D = M
+  @add
+  A = M
+  M = D
+
+  // increment
+  @add
+  M = M + 1
+  @i
+  M = M + 1
+
+  @CHANGELOOP
+  0;JMP
