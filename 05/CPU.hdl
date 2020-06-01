@@ -25,10 +25,47 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+/*
+    ixxaccccccdddjjj
+
+    // 15 - i
+    optcode: 
+    0 = A-instruction
+    1 = C-instruction
+
+    // 12 - a
+    0 = A-register
+    1 = M-register
+
+    // 11 - c1
+    ALU zx: zero x input
+    // 10 - c2
+    ALU nx: negate x input
+    // 9 - c3
+    ALU zy: zero y input
+    // 8 - c4
+    ALU ny: negate y input
+    // 7 - c5
+    ALU f: 
+    0 = And
+    1 = Add
+    // 6 - c6
+    ALU no: negate the out output
+
+    // 5 - d1
+    A-register
+    // 4 - d2
+    D-register
+    // 3 - d3
+    M-register
+*/
+
 CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
         instruction[16], // Instruction for execution
+                         // A-instruction: 16-bit
+                         // C-instruction: ixxacccccdddjjj
         reset;           // Signals whether to re-start the current
                          // program (reset==1) or continue executing
                          // the current program (reset==0).
@@ -40,4 +77,22 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+    // 15 - i
+    // if i == 0 (a-instruction): store instruction in A
+    // else store ALU in A
+
+    // Check if ALUOutput should be saved to A
+    // 5 - d1: A-register
+    Mux16(a=ARegisterState, b=ALUOutput, sel=instruction[5], out=AFromALUOutput);
+    Mux16(a=instruction, b=AFromALUOutput, sel=instruction[15], out=AInput);
+    Not(in=instruction[15], out=storeA);
+    ARegister(in=AInput, load=storeA, out=ARegisterState);
+
+    // 12 - a
+    Mux16(a=ARegisterState, b=inM, sel=instruction[12], out=AorMRegisterState);
+    // 4 - d2: D-register
+    DRegister(in=ALUOut, load=instruction[4], out=DRegisterState);
+    ALU(x=DRegisterState, y=AorMRegisterState, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUOutput, zr=zero, ng=negative, out=outM);
+
+
 }
