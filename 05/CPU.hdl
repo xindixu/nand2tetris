@@ -84,55 +84,67 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
-    // Check if Anything should be saved to A
 
+
+    // ======== A-register ========
+    // Check if Anything should be saved to A
+    // Save when: A-instruction or C-instruction with save to A-register bit
     // 15 - i: opt-code - 0 -> A-instruction
     Not(in=instruction[15], out=AInstruction);
+    // 5 - d1: A-register 
     Or(a=AInstruction, b=instruction[5], out=storeA);
 
     // What to save to A
-    // 5 - d1: A-register
+    // 15 - i: opt-code - 0 -> A-instruction
+    // if A-instruction, instruction
+    // else, ALUOutput
     Mux16(a=instruction, b=ALUOutput, sel=instruction[15], out=AInput);
-    ARegister(in=AInput, load=storeA, out=ARegisterState, out[0..14]=addressM);
+    ARegister(in=AInput, load=storeA, out=ARegisterState);
 
-    // 12 - a
+    // ======== ALU ========
+    // 12 - a: 0 -> A-register, 1 -> M-register
     Mux16(a=ARegisterState, b=inM, sel=instruction[12], out=AorMRegisterState);
-
 
     ALU(x=DRegisterState, y=AorMRegisterState, zx=instruction[11], nx=instruction[10], 
     zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUOutput, 
     zr=zero, ng=negative, out=outM);
 
+    // ======== D-register ========
     // Check if ALUOutput should be saved to D
     // 15 - i: opt-code - 1 -> c-instruction
     // 4 - d2: D-register
     And(a=instruction[15], b=instruction[4], out=storeD);
     DRegister(in=ALUOutput, load=storeD, out=DRegisterState);
 
-    // should write and where to write?
+    // ======== Memory ========
+    // Should write and where to write?
+    // Write when c-instruction with save to M-register bit
     // 15 - i: opt-code - 1 -> c-instruction
     // 3 - d3: M-register
+    // Write to == ARegisterState
     And(a=instruction[15], b=instruction[3], out=writeM);
+    And16(a=true, b=ARegisterState, out[0..14]=addressM);
 
+    // ======== PC ========
     // Handle jump
+    // Conditions
     Not(in=negative, out=positive);
     Not(in=zero, out=notZero);
     And(a=positive, b=notZero, out=positiveNotZero);
 
+    // Jump when condition are met for either j1, j2, j3
     // case JGT (j3)   0 - j3
     And(a=instruction[15], b=instruction[0], out=JGT);
     And(a=positiveNotZero, b=JGT, out=j1);
-
     // case JEQ (j2)   1 - j2
     And(a=instruction[15], b=instruction[1], out=JEQ);
     And(a=zero, b=JEQ, out=j2);
-
     // case JLT (j1)   2 - j1
     And(a=instruction[15], b=instruction[2], out=JLT);
     And(a=negative, b=JLT, out=j3);
 
     Or(a=j1, b=j2, out=j1Orj2);
     Or(a=j3, b=j1Orj2, out=jump);
-
+    
     PC(in=ARegisterState, load=jump, inc=true, reset=reset, out[0..14]=pc);
 }
