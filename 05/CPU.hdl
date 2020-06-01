@@ -58,6 +58,13 @@
     D-register
     // 3 - d3
     M-register
+
+    // 2 - j1
+    JLT - less than 0  < 0 
+    // 1 - j2
+    JEQ - equal to 0   == 0
+    // 0 - j3
+    JGT - less than 0  > 0
 */
 
 CHIP CPU {
@@ -77,42 +84,55 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
-    // 15 - i
-    // if i == 0 (a-instruction): store instruction in A
-    // else store ALU in A
+    // Check if Anything should be saved to A
 
-    // Check if ALUOutput should be saved to A
+    // 15 - i: opt-code - 0 -> A-instruction
+    Not(in=instruction[15], out=AInstruction);
+    Or(a=AInstruction, b=instruction[5], out=storeA);
+
+    // What to save to A
     // 5 - d1: A-register
-    Mux16(a=ARegisterState, b=ALUOutput, sel=instruction[5], out=AFromALUOutput);
-    Mux16(a=instruction, b=AFromALUOutput, sel=instruction[15], out=AInput);
-    Not(in=instruction[15], out=storeA);
-    ARegister(in=AInput, load=storeA, out=ARegisterState);
+    Mux16(a=instruction, b=ALUOutput, sel=instruction[15], out=AInput);
+    ARegister(in=AInput, load=storeA, out=ARegisterState, out[0..14]=addressM);
 
     // 12 - a
     Mux16(a=ARegisterState, b=inM, sel=instruction[12], out=AorMRegisterState);
+
+
+    ALU(x=DRegisterState, y=AorMRegisterState, zx=instruction[11], nx=instruction[10], 
+    zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUOutput, 
+    zr=zero, ng=negative, out=outM);
+
+    // Check if ALUOutput should be saved to D
+    // 15 - i: opt-code - 1 -> c-instruction
     // 4 - d2: D-register
-    DRegister(in=ALUOut, load=instruction[4], out=DRegisterState);
-    ALU(x=DRegisterState, y=AorMRegisterState, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=ALUOutput, zr=zero, ng=negative, out=outM);
+    And(a=instruction[15], b=instruction[4], out=storeD);
+    DRegister(in=ALUOutput, load=storeD, out=DRegisterState);
+
+    // should write and where to write?
+    // 15 - i: opt-code - 1 -> c-instruction
+    // 3 - d3: M-register
+    And(a=instruction[15], b=instruction[3], out=writeM);
 
     // Handle jump
     Not(in=negative, out=positive);
-    And(a=instruction[0], b=positive, out=JGT);
-    And(a=instruction[1], b=zero, out=JEQ);
-    Or(a=JGT, b=JEQ, out=JGE);
-    And(a=instruction[2], b=negative, out=JLT);
-    Or(a=JLT, b=JGT, out=JNE);
-    Or(a=JLT, b=JEQ, out=JLE);
-    And(a=instruction[0], b=instruction[1], out=j0Andj1);
-    And(a=instruction[2], b=j0Andj1, out=JMP);
-    Not(in=JMP, out=noJMP);
+    Not(in=zero, out=notZero);
+    And(a=positive, b=notZero, out=positiveNotZero);
 
-    Or8Way(in[0]=false, in[1]=JGT, in[2]=JEQ, in[3]=JGE, in[4]=JLT, in[5]=JNE, in[6]=JLE, in[7]=JMP, out=jump);
+    // case JGT (j3)   0 - j3
+    And(a=instruction[15], b=instruction[0], out=JGT);
+    And(a=positiveNotZero, b=JGT, out=j1);
 
-    PC(in=ARegisterState, load=jump, inc=true, reset=reset, out=pc);
+    // case JEQ (j2)   1 - j2
+    And(a=instruction[15], b=instruction[1], out=JEQ);
+    And(a=zero, b=JEQ, out=j2);
 
-    // should write and where to write?
-    // 3 - d3: M-register
-    And(a=true, b=instruction[3], out=writeM);
-    And(a=true, b=ARegisterState, out=addressM);
+    // case JLT (j1)   2 - j1
+    And(a=instruction[15], b=instruction[2], out=JLT);
+    And(a=negative, b=JLT, out=j3);
 
+    Or(a=j1, b=j2, out=j1Orj2);
+    Or(a=j3, b=j1Orj2, out=jump);
+
+    PC(in=ARegisterState, load=jump, inc=true, reset=reset, out[0..14]=pc);
 }
