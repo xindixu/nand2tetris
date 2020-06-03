@@ -65,6 +65,7 @@ builtIn = {
     "KBD": 24576,
 }
 
+
 class Parser:
     def __init__(self, file):
         self.file = file
@@ -110,13 +111,14 @@ class Parser:
             'comp': comp,
             'jump': jump
         })
-    
+
     def parseDeclaration(self, line):
         symbolToDeclare = line.split('(')[1].split(')')[0]
         self.parsed.append({
             'type': 'd',
             'symbol': symbolToDeclare
         })
+
 
 class Translator:
     def __init__(self, instructions, table):
@@ -137,27 +139,26 @@ class Translator:
             address = int(aInstruction['value'])
         except:
             address = self.table.get(aInstruction['value'])
-            print(address)
 
         value = "{0:016b}".format(address)
         self.binary.append(f"{value}\n")
 
     def translateCInstruction(self, cInstruction):
-        code = '111'
+        baseCode = '111'
         compCode = comp[cInstruction['comp']]
         destCode = dest[cInstruction['dest']]
         jumpCode = jump[cInstruction['jump']]
-        self.binary.append(f"{code}{compCode}{destCode}{jumpCode}\n")
+        self.binary.append(f"{baseCode}{compCode}{destCode}{jumpCode}\n")
 
 
 class SymbolTable:
     def __init__(self, instructions):
         self.table = builtIn
-        for i in range(0,16):
+        for i in range(0, 16):
             self.table[f"R{i}"] = i
         self.pointer = 16
 
-        i = 0 
+        i = 0
         while i < len(instructions):
             instruction = instructions[i]
             if instruction['type'] == 'd':
@@ -165,13 +166,11 @@ class SymbolTable:
                 del instructions[i]
             i += 1
 
-        
-    
     def append(self, key):
         self.table[key] = self.pointer
         self.pointer += 1
         return self.pointer - 1
-    
+
     def add(self, key, value):
         self.table[key] = value
 
@@ -182,20 +181,18 @@ class SymbolTable:
             return self.append(key)
 
 
-
-
 def main():
     pathToFile = sys.argv[1]
     file = open(pathToFile, 'r')
     instructions = Parser(file).parse()
     table = SymbolTable(instructions)
-    print(table.table)
     binary = Translator(instructions, table).translate()
-
     pathToOutputFile = pathToFile.split('.')[0]
     try:
-      outputFile = open(f"{pathToOutputFile}.hack", 'x')
+        outputFile = open(f"{pathToOutputFile}.hack", 'x')
     except FileExistsError:
-      outputFile = open(f"{pathToOutputFile}.hack", "w")
+        outputFile = open(f"{pathToOutputFile}.hack", "w")
     outputFile.writelines(binary)
+
+
 main()
