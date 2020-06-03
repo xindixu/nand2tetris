@@ -1,6 +1,5 @@
 import sys
 
-
 class Parser:
     def __init__(self, file):
         self.file = file
@@ -9,43 +8,35 @@ class Parser:
     def parse(self):
         lines = self.file.readlines()
         for line in lines:
-            if line.startswith('//'):
+            line = self.cleanUpLine(line)
+            if len(line) == 0:
                 continue
+            elif line.startswith('@'):
+                self.parseAInstruction(line)
             else:
-                line = self.cleanUpLine(line)
-                if len(line) == 0:
-                    continue
-                elif line.startswith('@'):
-                    self.splitAInstruction(line)
-                else:
-                    self.splitCInstruction(line)
-        print(self.parsed)
+                self.parseCInstruction(line)
         return self.parsed
 
     def cleanUpLine(self, line):
         return line.split('//', 1)[0].strip()
 
-    def splitAInstruction(self, aInstruction):
+    def parseAInstruction(self, aInstruction):
         value = aInstruction.split('@')[1]
         self.parsed.append({
             'type': 'a',
             'value': value
         })
 
-    def splitCInstruction(self, cInstruction):
-        try:
-          dest = cInstruction.split('=')[0].split(';')[0].replace(" ", "")
-        except:
-          dest = None
+    def parseCInstruction(self, cInstruction):
+        if not '=' in cInstruction:
+            cInstruction = 'null=' + cInstruction
+        if not ';' in cInstruction:
+            cInstruction = cInstruction + ';null'
 
-        try:
-            comp = cInstruction.split('=')[1].split(';')[0].replace(" ", "")
-        except:
-            comp = None
-        try:
-            jump = cInstruction.split(';')[1].replace(" ", "")
-        except:
-            jump = None
+        dest = cInstruction.split('=')[0].replace(" ", "")
+        comp = cInstruction.split('=')[1].split(';')[0].replace(" ", "")
+        jump = cInstruction.split(';')[1].replace(" ", "")
+
         self.parsed.append({
             'type': 'c',
             'dest': dest,
@@ -54,9 +45,22 @@ class Parser:
         })
 
 
-class Translate:
-    def __init__(self):
-        print('init Translate')
+class Translator:
+    def __init__(self, instructions):
+        self.instructions = instructions
+
+    def translate(self):
+        for instruction in self.instructions:
+            if instruction['type'] == 'a':
+                self.translateAInstruction(instruction)
+            else:
+                self.translateCInstruction(instruction)
+
+    def translateAInstruction(self, aInstruction):
+        print(aInstruction)
+
+    def translateCInstruction(self, cInstruction):
+        print(cInstruction)
 
 
 class SymbolTable:
@@ -67,8 +71,8 @@ class SymbolTable:
 def main():
     filename = sys.argv[1]
     file = open(filename, 'r')
-    parser = Parser(file)
-    parsed = parser.parse()
+    instructions = Parser(file).parse()
+    translated = Translator(instructions).translate()
 
 
 main()
