@@ -1,12 +1,27 @@
 import sys
 
-operandA = 'R10'
-operandB = 'R11'
+operandA = 'R13'
+operandB = 'R14'
 
-arithmetic = {
+arithBinaryOperator = {
     'add': '+',
-
+    'sub': '-',
+    'and': '&',
+    'or': '|',
 }
+
+arithUnaryOperator = {
+    'neg': '-',
+    'not': '!',
+}
+
+compare = {
+    'lt': 'JLT',
+    'eq': 'JEQ',
+    'gt': 'JGT'
+}
+
+
 class Parser:
     def __init__(self, file):
         self.file = file
@@ -50,6 +65,7 @@ class Translator:
     def __init__(self, instructions):
         self.instructions = instructions
         self.assembly = []
+        self.jumpFlag = 0
 
     def translate(self):
         for instruction in self.instructions:
@@ -66,7 +82,7 @@ class Translator:
 @END
 0;JMP
 """
-            )
+        )
         return self.assembly
 
     def getAddress(self, instruction):
@@ -125,8 +141,40 @@ D = M
         )
 
     def translateArithmetic(self, instruction):
-        operator = arithmetic[instruction['arg1']]
-        string = f"""\
+        operatorString = instruction['arg1']
+        try:
+            operator = compare[operatorString]
+            self.assembly.append(f"""\
+// {instruction['original']}
+{self.pop(operandA)}
+{self.pop(operandB)}
+
+@{operandA}
+D = M
+@{operandB}
+D = D - M
+
+@FALSE{self.jumpFlag}
+D;{operator}
+
+D = 1
+{self.push()}
+
+@CONTINUE{self.jumpFlag}
+0;JMP
+
+(FALSE{self.jumpFlag})
+D = 0
+{self.push()}
+(CONTINUE{self.jumpFlag})
+"""
+            )
+            self.jumpFlag += 1
+        except:
+            try:
+                operator = arithBinaryOperator[operatorString]
+                self.assembly.append(
+                    f"""\
 // {instruction['original']}
 {self.pop(operandA)}
 {self.pop(operandB)}
@@ -138,20 +186,20 @@ D = D {operator} M
 
 {self.push()}
 """
-        self.assembly.append(
-            f"""\
+                )
+            except:
+                operator = arithUnaryOperator[instruction['arg1']]
+                self.assembly.append(
+                    f"""\
 // {instruction['original']}
 {self.pop(operandA)}
-{self.pop(operandB)}
 
 @{operandA}
-D = M
-@{operandB}
-D = D {operator} M
+D = {operator}M
 
 {self.push()}
 """
-        )
+                )
 
 
 def main():
