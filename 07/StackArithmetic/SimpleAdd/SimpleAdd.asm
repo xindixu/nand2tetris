@@ -1,3 +1,4 @@
+
 // push constant 7
 @7
 D = A
@@ -23,20 +24,20 @@ M = M + 1
 M = M - 1
 A = M
 D = M
-@R10
+@R13
 M = D
 
 @SP
 M = M - 1
 A = M
 D = M
-@R11
+@R14
 M = D
 
 
-@R10
+@R13
 D = M
-@R11
+@R14
 D = D + M
 
 @SP
