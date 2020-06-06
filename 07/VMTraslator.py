@@ -1,7 +1,9 @@
 import sys
 
+# Operand stores the value, address stores the address
 operandA = 'R13'
 operandB = 'R14'
+address = 'R15'
 
 arithBinaryOperator = {
     'add': '+',
@@ -19,6 +21,15 @@ compare = {
     'lt': 'JGE',
     'eq': 'JNE',
     'gt': 'JLE'
+}
+
+segment = {
+    'temp': 5,
+    'static': 16,
+    'local': 'LCL',
+    'argument': 'ARG',
+    'this': 'THIS',
+    'that': 'THAT',
 }
 
 
@@ -93,9 +104,12 @@ D = A
 """
         else:
             return f"""\
-@{instruction['arg1']}
-A = M + instruction['arg2']
+@{segment[instruction['arg1']]}
 D = M
+@{instruction['arg2']}
+D = D + A
+@{address}
+M = D
 """
 
     def push(self):
@@ -107,10 +121,18 @@ M = D
 M = M + 1
 """
 
-    def pop(self, destination):
+    def pop(self, destination=None):
         dest = ''
         if destination:
-            dest = f"""\
+            if destination == address:
+
+                dest = f"""\
+@{destination}
+A = M
+M = D
+"""
+            else:
+                dest = f"""\
 @{destination}
 M = D
 """
@@ -135,8 +157,8 @@ D = M
         self.assembly.append(
             f"""
 // {instruction['original']}
-{self.pop()}
 {self.getAddress(instruction)}\
+{self.pop(address)}
 """
         )
 
