@@ -16,9 +16,9 @@ arithUnaryOperator = {
 }
 
 compare = {
-    'lt': 'JLT',
-    'eq': 'JEQ',
-    'gt': 'JGT'
+    'lt': 'JGE',
+    'eq': 'JNE',
+    'gt': 'JLE'
 }
 
 
@@ -124,19 +124,19 @@ D = M
 
     def translatePush(self, instruction):
         self.assembly.append(
-            f"""\
+            f"""
 // {instruction['original']}
 {self.getAddress(instruction)}
-{self.push()}
+{self.push()}\
 """
         )
 
     def translatePop(self, instruction):
         self.assembly.append(
-            f"""\
+            f"""
 // {instruction['original']}
 {self.pop()}
-{self.getAddress(instruction)}
+{self.getAddress(instruction)}\
 """
         )
 
@@ -144,7 +144,7 @@ D = M
         operatorString = instruction['arg1']
         try:
             operator = compare[operatorString]
-            self.assembly.append(f"""\
+            self.assembly.append(f"""
 // {instruction['original']}
 {self.pop(operandA)}
 {self.pop(operandB)}
@@ -152,12 +152,12 @@ D = M
 @{operandA}
 D = M
 @{operandB}
-D = D - M
+D = M - D
 
 @FALSE{self.jumpFlag}
 D;{operator}
 
-D = 1
+D = -1
 {self.push()}
 
 @CONTINUE{self.jumpFlag}
@@ -174,7 +174,7 @@ D = 0
             try:
                 operator = arithBinaryOperator[operatorString]
                 self.assembly.append(
-                    f"""\
+                    f"""
 // {instruction['original']}
 {self.pop(operandA)}
 {self.pop(operandB)}
@@ -182,7 +182,7 @@ D = 0
 @{operandA}
 D = M
 @{operandB}
-D = D {operator} M
+D = M {operator} D
 
 {self.push()}
 """
@@ -190,7 +190,7 @@ D = D {operator} M
             except:
                 operator = arithUnaryOperator[instruction['arg1']]
                 self.assembly.append(
-                    f"""\
+                    f"""
 // {instruction['original']}
 {self.pop(operandA)}
 
