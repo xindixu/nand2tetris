@@ -23,7 +23,7 @@ compare = {
     'gt': 'JLE'
 }
 
-segment = {
+segments = {
     'temp': 5,
     'static': 16,
     'local': 'LCL',
@@ -96,20 +96,38 @@ class Translator:
         )
         return self.assembly
 
-    def getAddress(self, instruction):
-        if instruction['arg1'] == 'constant':
+    def getAddress(self, instruction, save):
+        segment = instruction['arg1']
+
+        if segment == 'constant':
             return f"""\
 @{instruction['arg2']}
 D = A
 """
-        else:
-            return f"""\
-@{segment[instruction['arg1']]}
-D = M
-@{instruction['arg2']}
-D = D + A
+        segmentCode = segments[segment]
+        if isinstance(segmentCode, int):
+            # SegmentCode is an int, 
+            # implies that the base address of the segment is at that position.
+            baseAddress = 'A'
+        elif isinstance(segmentCode, str):
+            # SegmentCode is an str, 
+            # implies that the base address of the segment is the content in that position.
+            baseAddress = 'M'
+
+        if save:
+            saveCode = f"""\
 @{address}
 M = D
+"""
+        else:
+            saveCode = ''
+
+        return f"""\
+@{instruction['arg2']}
+D = A
+@{segmentCode}
+D = {baseAddress} + D
+{saveCode}
 """
 
     def push(self):
@@ -125,7 +143,6 @@ M = M + 1
         dest = ''
         if destination:
             if destination == address:
-
                 dest = f"""\
 @{destination}
 A = M
@@ -136,10 +153,10 @@ M = D
 @{destination}
 M = D
 """
+        # pop stack into D
         return f"""\
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 {dest}\
 """
@@ -148,7 +165,7 @@ D = M
         self.assembly.append(
             f"""
 // {instruction['original']}
-{self.getAddress(instruction)}
+{self.getAddress(instruction, False)}
 {self.push()}\
 """
         )
@@ -157,7 +174,7 @@ D = M
         self.assembly.append(
             f"""
 // {instruction['original']}
-{self.getAddress(instruction)}\
+{self.getAddress(instruction, True)}\
 {self.pop(address)}
 """
         )
