@@ -21,15 +21,13 @@ M = M + 1
 
 // eq
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -86,15 +84,13 @@ M = M + 1
 
 // eq
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -151,15 +147,13 @@ M = M + 1
 
 // eq
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -216,15 +210,13 @@ M = M + 1
 
 // lt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -281,15 +273,13 @@ M = M + 1
 
 // lt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -346,15 +336,13 @@ M = M + 1
 
 // lt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -411,15 +399,13 @@ M = M + 1
 
 // gt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -476,15 +462,13 @@ M = M + 1
 
 // gt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -541,15 +525,13 @@ M = M + 1
 
 // gt
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -616,15 +598,13 @@ M = M + 1
 
 // add
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -654,15 +634,13 @@ M = M + 1
 
 // sub
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -682,8 +660,7 @@ M = M + 1
 
 // neg
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
@@ -701,15 +678,13 @@ M = M + 1
 
 // and
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -739,15 +714,13 @@ M = M + 1
 
 // or
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D
 
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R14
 M = D
@@ -767,8 +740,7 @@ M = M + 1
 
 // not
 @SP
-M = M - 1
-A = M
+AM = M - 1
 D = M
 @R13
 M = D

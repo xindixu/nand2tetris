@@ -115,18 +115,29 @@ D = A
             baseAddress = 'M'
 
         if save:
+            dest = f"""\
+D = {baseAddress} + D
+"""
+
             saveCode = f"""\
 @{address}
 M = D
 """
         else:
-            saveCode = ''
+            dest = f"""\
+A = {baseAddress} + D
+"""
+
+            saveCode = f"""\
+D = M
+"""
+            print(segment, save)
 
         return f"""\
 @{instruction['arg2']}
 D = A
 @{segmentCode}
-D = {baseAddress} + D
+{dest}
 {saveCode}
 """
 
