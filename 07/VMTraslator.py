@@ -96,15 +96,37 @@ class Translator:
         )
         return self.assembly
 
-    def getAddress(self, instruction, save):
+    def getAddress(self, instruction, pop):
         segment = instruction['arg1']
-
+        num = instruction['arg2']
         if segment == 'constant':
             return f"""\
-@{instruction['arg2']}
+@{num}
 D = A
 """
+        if segment == 'pointer':
+            if num == '0':
+                segmentCode = segments['this']
+            elif num == '1':
+                segmentCode = segments['that']
+            if pop:
+                saveCode = f"""\
+M = D
+@{address}
+M = D
+"""
+            else:
+                saveCode = f"""\
+D = M
+""" 
+            return f"""\
+@{segmentCode}
+A = M
+{saveCode}
+"""
+
         segmentCode = segments[segment]
+
         if isinstance(segmentCode, int):
             # SegmentCode is an int, 
             # implies that the base address of the segment is at that position.
@@ -114,11 +136,10 @@ D = A
             # implies that the base address of the segment is the content in that position.
             baseAddress = 'M'
 
-        if save:
+        if pop:
             dest = f"""\
 D = {baseAddress} + D
 """
-
             saveCode = f"""\
 @{address}
 M = D
@@ -127,14 +148,12 @@ M = D
             dest = f"""\
 A = {baseAddress} + D
 """
-
             saveCode = f"""\
 D = M
 """
-            print(segment, save)
 
         return f"""\
-@{instruction['arg2']}
+@{num}
 D = A
 @{segmentCode}
 {dest}
